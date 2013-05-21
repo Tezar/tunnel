@@ -50,11 +50,15 @@ private:
 };
 
 
-const int ResX=1680;
-const int ResY=1050;
+const int ResX=1920;
+const int ResY=1080;
 
-int main()
-{
+int main(){
+	int ViewPortOffset = 25;						// "frame" size
+	int ViewPortSize = ResX/2-ViewPortOffset*2;		// ViewPortSize
+	int ViewportTopOffset=(ResY-ViewPortSize)/2;	// top to ViewPort
+	
+	const int ResY=1080;
 	// create device
     EventHandler receiver;
 
@@ -65,13 +69,12 @@ int main()
 
 
 	 IrrlichtDevice *device =
-		 createDevice( video::EDT_OPENGL, dimension2d<u32>(ResX, ResY), 16,
-            true, false, false, &receiver);
+		 createDevice( video::EDT_DIRECT3D9, dimension2d<u32>(ResX, ResY), 32, true, false, false, &receiver);
 
     if (!device)
         return 1;
 
-	device->setWindowCaption(L"Hello World! - Irrlicht Engine Demo");
+	device->setWindowCaption(L"A Hole");
 
 
     IVideoDriver* driver = device->getVideoDriver();
@@ -134,13 +137,17 @@ int main()
 		}
 
 		if(receiver.IsKeyDown(irr::KEY_KEY_Q)){
-			VIEWPORT_OFFSET += 0.1;
+			VIEWPORT_OFFSET += 1;
 			printf("view %3.2f\n",VIEWPORT_OFFSET);
 		}
 
 		if(receiver.IsKeyDown(irr::KEY_KEY_E)){
-			VIEWPORT_OFFSET -= 0.1;
+			VIEWPORT_OFFSET -= 1;
 			printf("view %3.2f\n",VIEWPORT_OFFSET);
+		}
+
+		if(receiver.IsKeyDown(irr::KEY_ESCAPE)){
+			break;
 		}
 
 		for(int i = 0; i < MAX_OBJECTS; i++){
@@ -156,12 +163,20 @@ int main()
 
 		smgr->setActiveCamera(leftEye);
 		leftEye->setTarget( pos + vector3df(-EYES_OFFSET,5,5));
-		driver->setViewPort(rect<s32>(-VIEWPORT_OFFSET,0,ResX/2-VIEWPORT_OFFSET,ResY));
+		driver->setViewPort(rect<s32>(
+			ViewPortOffset-VIEWPORT_OFFSET,
+			ViewportTopOffset,
+			ViewPortOffset+ViewPortSize-VIEWPORT_OFFSET,
+			ViewPortSize));
         smgr->drawAll();
 
 		smgr->setActiveCamera(rightEye);
 		rightEye->setTarget( pos + vector3df(+EYES_OFFSET,5,5));
-		driver->setViewPort(rect<s32>(ResX/2+VIEWPORT_OFFSET,0,ResX+VIEWPORT_OFFSET,ResY));
+		driver->setViewPort(rect<s32>(
+			ResX/2+VIEWPORT_OFFSET+ViewPortOffset,
+			ViewportTopOffset,
+			ResX/2+VIEWPORT_OFFSET+ViewPortOffset+ViewPortSize,
+			ViewPortSize));
         smgr->drawAll();
 
         guienv->drawAll();
