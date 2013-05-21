@@ -12,7 +12,9 @@ using namespace gui;
 
 
 #define MAX_OBJECTS 50
-#define EYES_OFFSET 5
+//#define EYES_OFFSET 5
+
+float EYES_OFFSET = 5.0;
 
 class EventHandler : public IEventReceiver
 {
@@ -47,8 +49,8 @@ private:
 };
 
 
-const int ResX=800;
-const int ResY=600;
+const int ResX=1680;
+const int ResY=1050;
 
 int main()
 {
@@ -61,9 +63,8 @@ int main()
 	ICameraSceneNode* rightEye;
 
 
-
 	 IrrlichtDevice *device =
-		 createDevice( video::EDT_OPENGL, dimension2d<u32>(ResX, ResY), 32,
+		 createDevice( video::EDT_OPENGL, dimension2d<u32>(ResX, ResY), 16,
             true, false, false, &receiver);
 
     if (!device)
@@ -93,10 +94,12 @@ int main()
 
 
 	ISceneNode* cameraRig = smgr->addEmptySceneNode();
-	leftEye = smgr->addCameraSceneNode(cameraRig,vector3df(-EYES_OFFSET,0,0));
+	leftEye = smgr->addCameraSceneNode(cameraRig);
 	leftEye->bindTargetAndRotation(false);
-	rightEye = smgr->addCameraSceneNode(cameraRig,vector3df(EYES_OFFSET,0,0));
+	rightEye = smgr->addCameraSceneNode(cameraRig);
 	
+
+
 	vector3df pos = vector3df(0,0,0);
 
 	//naplníme tunel pøekážkama
@@ -119,12 +122,26 @@ int main()
 			cameraRig->setPosition(pos);
 		}
 
+		if(receiver.IsKeyDown(irr::KEY_KEY_A)){
+			EYES_OFFSET += 0.01;
+			printf("%3.2f\n",EYES_OFFSET);
+		}
+
+		if(receiver.IsKeyDown(irr::KEY_KEY_D)){
+			EYES_OFFSET -= 0.01;
+			printf("%3.2f\n",EYES_OFFSET);
+		}
+
 		for(int i = 0; i < MAX_OBJECTS; i++){
 			vector3df tmpPos = objects[i]->getPosition();
 			if(tmpPos.Z > pos.Z) continue;
 			
 			objects[i]->setPosition( vector3df( (rand() % 30) - 15, (rand() % 30) - 15, rand() % 80 + pos.Z) );
 		}
+
+		leftEye->setPosition( vector3df(-EYES_OFFSET,0,0));
+		rightEye->setPosition( vector3df(EYES_OFFSET,0,0));
+		
 
 		smgr->setActiveCamera(leftEye);
 		leftEye->setTarget( pos + vector3df(-EYES_OFFSET,0,5));
