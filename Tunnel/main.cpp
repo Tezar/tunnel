@@ -15,6 +15,7 @@ using namespace gui;
 //#define EYES_OFFSET 5
 
 float EYES_OFFSET = 5.0;
+float VIEWPORT_OFFSET = 5.0;
 
 class EventHandler : public IEventReceiver
 {
@@ -124,12 +125,22 @@ int main()
 
 		if(receiver.IsKeyDown(irr::KEY_KEY_A)){
 			EYES_OFFSET += 0.01;
-			printf("%3.2f\n",EYES_OFFSET);
+			printf("eye %3.2f\n",EYES_OFFSET);
 		}
 
 		if(receiver.IsKeyDown(irr::KEY_KEY_D)){
 			EYES_OFFSET -= 0.01;
-			printf("%3.2f\n",EYES_OFFSET);
+			printf("eye %3.2f\n",EYES_OFFSET);
+		}
+
+		if(receiver.IsKeyDown(irr::KEY_KEY_Q)){
+			VIEWPORT_OFFSET += 0.01;
+			printf("view %3.2f\n",VIEWPORT_OFFSET);
+		}
+
+		if(receiver.IsKeyDown(irr::KEY_KEY_E)){
+			VIEWPORT_OFFSET -= 0.01;
+			printf("view %3.2f\n",VIEWPORT_OFFSET);
 		}
 
 		for(int i = 0; i < MAX_OBJECTS; i++){
@@ -145,12 +156,12 @@ int main()
 
 		smgr->setActiveCamera(leftEye);
 		leftEye->setTarget( pos + vector3df(-EYES_OFFSET,0,5));
-		driver->setViewPort(rect<s32>(0,0,ResX/2,ResY));
+		driver->setViewPort(rect<s32>(-VIEWPORT_OFFSET,0,ResX/2-VIEWPORT_OFFSET,ResY));
         smgr->drawAll();
 
 		smgr->setActiveCamera(rightEye);
 		rightEye->setTarget( pos + vector3df(+EYES_OFFSET,0,5));
-		driver->setViewPort(rect<s32>(ResX/2,0,ResX,ResY));
+		driver->setViewPort(rect<s32>(ResX/2+VIEWPORT_OFFSET,0,ResX+VIEWPORT_OFFSET,ResY));
         smgr->drawAll();
 
         guienv->drawAll();
