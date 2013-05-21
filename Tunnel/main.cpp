@@ -134,12 +134,12 @@ int main()
 		}
 
 		if(receiver.IsKeyDown(irr::KEY_KEY_Q)){
-			VIEWPORT_OFFSET += 0.01;
+			VIEWPORT_OFFSET += 0.1;
 			printf("view %3.2f\n",VIEWPORT_OFFSET);
 		}
 
 		if(receiver.IsKeyDown(irr::KEY_KEY_E)){
-			VIEWPORT_OFFSET -= 0.01;
+			VIEWPORT_OFFSET -= 0.1;
 			printf("view %3.2f\n",VIEWPORT_OFFSET);
 		}
 
@@ -150,17 +150,17 @@ int main()
 			objects[i]->setPosition( vector3df( (rand() % 30) - 15, (rand() % 30) - 15, rand() % 80 + pos.Z) );
 		}
 
-		leftEye->setPosition( vector3df(-EYES_OFFSET,0,0));
-		rightEye->setPosition( vector3df(EYES_OFFSET,0,0));
+		leftEye->setPosition( vector3df(-EYES_OFFSET,5,0));
+		rightEye->setPosition( vector3df(EYES_OFFSET,5,0));
 		
 
 		smgr->setActiveCamera(leftEye);
-		leftEye->setTarget( pos + vector3df(-EYES_OFFSET,0,5));
+		leftEye->setTarget( pos + vector3df(-EYES_OFFSET,5,5));
 		driver->setViewPort(rect<s32>(-VIEWPORT_OFFSET,0,ResX/2-VIEWPORT_OFFSET,ResY));
         smgr->drawAll();
 
 		smgr->setActiveCamera(rightEye);
-		rightEye->setTarget( pos + vector3df(+EYES_OFFSET,0,5));
+		rightEye->setTarget( pos + vector3df(+EYES_OFFSET,5,5));
 		driver->setViewPort(rect<s32>(ResX/2+VIEWPORT_OFFSET,0,ResX+VIEWPORT_OFFSET,ResY));
         smgr->drawAll();
 
