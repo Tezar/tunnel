@@ -12,6 +12,7 @@ using namespace gui;
 
 
 #define MAX_OBJECTS 50
+#define EYES_OFFSET 5
 
 class EventHandler : public IEventReceiver
 {
@@ -46,6 +47,9 @@ private:
 };
 
 
+const int ResX=800;
+const int ResY=600;
+
 int main()
 {
 	// create device
@@ -53,9 +57,14 @@ int main()
 
 	ISceneNode* objects [MAX_OBJECTS];
 
+	ICameraSceneNode* leftEye;
+	ICameraSceneNode* rightEye;
+
+
+
 	 IrrlichtDevice *device =
-		 createDevice( video::EDT_OPENGL, dimension2d<u32>(800, 600), 16,
-            false, false, false, &receiver);
+		 createDevice( video::EDT_OPENGL, dimension2d<u32>(ResX, ResY), 32,
+            true, false, false, &receiver);
 
     if (!device)
         return 1;
@@ -82,8 +91,13 @@ int main()
         node->setMaterialTexture( 0, driver->getTexture("media/sydney.bmp") );
     }
 
-	ICameraSceneNode* camera = smgr->addCameraSceneNode(0, vector3df(0,0,-40), vector3df(0,0,0));
 
+	ISceneNode* cameraRig = smgr->addEmptySceneNode();
+	leftEye = smgr->addCameraSceneNode(cameraRig,vector3df(-EYES_OFFSET,0,0));
+	leftEye->bindTargetAndRotation(false);
+	rightEye = smgr->addCameraSceneNode(cameraRig,vector3df(EYES_OFFSET,0,0));
+	
+	vector3df pos = vector3df(0,0,0);
 
 	//naplníme tunel pøekážkama
 
@@ -95,17 +109,14 @@ int main()
 		objects[i]->setPosition( vector3df( (rand() % 30) - 5, (rand() % 30) - 5, rand() % 80) );
 	}
 
-
-
+	
     while(device->run())
     {
         driver->beginScene(true, true, SColor(255,100,101,140));
 		
-		vector3df pos = camera->getPosition();
-
 		if(receiver.IsKeyDown(irr::KEY_KEY_W)){
-			camera->setPosition( pos+vector3df(0,0,0.1)  );
-			camera->setTarget( pos+vector3df(0,0,5) );
+			pos.Z += 0.1;
+			cameraRig->setPosition(pos);
 		}
 
 		for(int i = 0; i < MAX_OBJECTS; i++){
@@ -115,13 +126,16 @@ int main()
 			objects[i]->setPosition( vector3df( (rand() % 30) - 15, (rand() % 30) - 15, rand() % 80 + pos.Z) );
 		}
 
-		
-            
-
-
-
-
+		smgr->setActiveCamera(leftEye);
+		leftEye->setTarget( pos + vector3df(-EYES_OFFSET,0,5));
+		driver->setViewPort(rect<s32>(0,0,ResX/2,ResY));
         smgr->drawAll();
+
+		smgr->setActiveCamera(rightEye);
+		rightEye->setTarget( pos + vector3df(+EYES_OFFSET,0,5));
+		driver->setViewPort(rect<s32>(ResX/2,0,ResX,ResY));
+        smgr->drawAll();
+
         guienv->drawAll();
 
         driver->endScene();
