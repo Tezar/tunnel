@@ -100,9 +100,13 @@ int main()
 
 	HMDStereoRender renderer(device, HMD, 10); 
 
-	smgr->addCameraSceneNodeFPS();
 
-	device->getCursorControl()->setVisible(false); 
+	smgr->addCameraSceneNode();
+	ICameraSceneNode* camera = smgr->getActiveCamera();
+	camera->bindTargetAndRotation(false);
+	camera->setTarget(vector3df(1,0,0));
+	 device->getCursorControl()->setVisible(false); 
+
 
 	// load a faerie 
 	IAnimatedMesh* faerie = smgr->getMesh("media/faerie.md2");
@@ -138,7 +142,7 @@ int main()
 		objects[i]->setPosition( vector3df( (rand() % 30) - 5, (rand() % 30) - 5, rand() % 80) );
 	}
 
-	device->setInputReceivingSceneManager(smgr);
+	//device->setInputReceivingSceneManager(smgr);
 	
     while(device->run())
     {
@@ -154,24 +158,29 @@ int main()
 		
 		if(pSensor){
 			Quatf quaternion = FusionResult.GetOrientation();
-			ICameraSceneNode* camera = smgr->getActiveCamera();
-			
-			vector3df rot; 
 
-			irr::core::quaternion q1(quaternion.x,quaternion.y, quaternion.z, quaternion.w);
-			q1.normalize();
-			q1.toEuler(rot);
-			
-			camera->setRotation(rot);
+		   ICameraSceneNode* camera = smgr->getActiveCamera();
+   
+		   vector3df rot; 
+		   
+
+		  // irr::core::quaternion q1(quaternion.x,quaternion.y, quaternion.z, quaternion.w);
+		   irr::core::quaternion q1(-quaternion.z,quaternion.y,-quaternion.x, quaternion.w);
+		   q1.normalize();
+		   q1.toEuler(rot);
+   
+		   
+		   //camera->getParent()->setRotation(rot*RADTODEG);
+
 
 			float yaw, pitch, roll;
 			quaternion.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
+			camera->getParent()->setRotation( vector3df(RadToDegree(pitch),RadToDegree(yaw),RadToDegree(roll)));
 			//camera->setRotation( vector3df(RadToDegree(-pitch),RadToDegree(-yaw),RadToDegree(roll)));
 			//camera->setProjectionMatrix(ToMatrix(quaternion));
-			/*cout << " Yaw: " << RadToDegree(yaw) << 
+			cout << " Yaw: " << RadToDegree(yaw) << 
 				", Pitch: " << RadToDegree(pitch) << 
-				", Roll: " << RadToDegree(roll) << endl;*/
-
+				", Roll: " << RadToDegree(roll) << endl;
 		
 			if (_kbhit()) exit(0);
 		}
@@ -181,7 +190,7 @@ int main()
 		#else
 			smgr->drawAll();
 		#endif
-        
+
         guienv->drawAll();
 
         driver->endScene();

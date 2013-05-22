@@ -19,12 +19,14 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 
 #include <iostream>
 #include <cassert>
+#include "OVR.h"
 
 using namespace irr;
 using namespace core;
 using namespace scene;
 using namespace video;
 using namespace std;
+using namespace OVR;
 
 static const char* vertexShader =
 "void main() {"
@@ -144,7 +146,7 @@ void HMDStereoRender::setHMD(HMDDescriptor HMD) {
   }
 }
 
-
+vector3df last =vector3df(0,0,0);
 void HMDStereoRender::drawAll(ISceneManager* smgr) {
 
   ICameraSceneNode* camera = smgr->getActiveCamera();
@@ -155,14 +157,25 @@ void HMDStereoRender::drawAll(ISceneManager* smgr) {
   
   _pCamera->setProjectionMatrix(_projectionLeft);
 
-  vector3df r = camera->getRotation();
+    vector3df r = camera->getRotation();
+
+  cout << " Yaw: " << (r.Y) << 
+				", Pitch: " << (r.X) << 
+				", Roll: " << (r.Z) << endl;
+  /*if(r.X>180){
+	r=last;
+  }else{
+	last=r;
+  }*/
   vector3df tx(-_eyeSeparation, 0.0,0.0);
   tx.rotateXZBy(-r.Y);
   tx.rotateYZBy(-r.X);
   tx.rotateXYBy(-r.Z);
 
   _pCamera->setPosition(camera->getPosition() + tx);
-  _pCamera->setTarget(camera->getTarget() + tx);  
+  //_pCamera->setTarget(camera->getTarget() + tx);  
+ // _pCamera->bindTargetAndRotation(false);
+  _pCamera->setRotation(r);
 
   smgr->setActiveCamera(_pCamera);
   smgr->drawAll();
