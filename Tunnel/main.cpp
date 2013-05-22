@@ -8,6 +8,8 @@
 
 #include "localSettings.h"
 
+#include "level.h"
+
 using namespace irr;
 
 using namespace core;
@@ -127,11 +129,9 @@ int main()
 	IAnimatedMeshSceneNode* dwarfNode = smgr->addAnimatedMeshSceneNode(dwarf);
 	dwarfNode->setPosition(vector3df(40,-25,20));
 	  
-	const irr::scene::IGeometryCreator* creator = smgr->getGeometryCreator();
 	
-	IMesh* cylinder = creator->createCylinderMesh(10, 10, 30, video::SColor(0,255,200,100), false, 10);
-	IMeshSceneNode* cylinderNode = smgr->addMeshSceneNode(cylinder);
-	cylinderNode->setMaterialFlag(EMF_LIGHTING, false);
+	Level currentLevel(device);
+	currentLevel.makeLevel(0);
 
 
 	vector3df pos = vector3df(0,0,0);
