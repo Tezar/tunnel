@@ -84,11 +84,12 @@ int main()
 
 
 	// load the quake map
-	device->getFileSystem()->addZipFileArchive("media/map-20kdm2.pk3");
+	/*
+	 device->getFileSystem()->addZipFileArchive("media/map-20kdm2.pk3");
 	IAnimatedMesh* mesh = smgr->getMesh("20kdm2.bsp");
 	ISceneNode* levelNode = smgr->addOctreeSceneNode(mesh->getMesh(0), 0, -1, 128);
 	levelNode->setPosition(core::vector3df(-1350,-90,-1400));
-	  
+	  */
 	// load a faerie 
 	IAnimatedMesh* faerie = smgr->getMesh("media/faerie.md2");
 	IAnimatedMeshSceneNode* faerieNode = smgr->addAnimatedMeshSceneNode(faerie);
@@ -123,6 +124,7 @@ int main()
 	
 	for(int i = 0; i < MAX_OBJECTS; i++){
 		objects[i] = smgr->addCubeSceneNode(2);
+		objects[i]->setMaterialFlag(EMF_LIGHTING, false);
 		objects[i]->setPosition( vector3df( (rand() % 30) - 5, (rand() % 30) - 5, rand() % 80) );
 	}
 
