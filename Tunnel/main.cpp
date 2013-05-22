@@ -2,6 +2,9 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include "HDMStereoRender/HMDStereoRender.h" 
+#include "OVR.h"
+#include <iostream>
+#include <conio.h>
 
 using namespace irr;
 
@@ -10,13 +13,26 @@ using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+using namespace OVR;
+using namespace std;
 
+Ptr<DeviceManager>	pManager;
+Ptr<HMDDevice>		pHMD;
+Ptr<SensorDevice>	pSensor;
+SensorFusion		FusionResult;
+HMDInfo			Info;
+bool			InfoLoaded;
 
 #define MAX_OBJECTS 50
 //#define EYES_OFFSET 5
 
 float EYES_OFFSET = 5.0;
 float VIEWPORT_OFFSET = 5.0;
+
+void Clear();
+void Init();
+void Open();
+void Output();
 
 class EventHandler : public IEventReceiver
 {
@@ -27,6 +43,7 @@ public:
         if (event.KeyInput.Key == KEY_ESCAPE)
         {
           device->closeDevice();
+		  Clear();
           return true;
         }
       }
@@ -37,8 +54,8 @@ public:
 }; 
 
 
-const int ResX=1280;
-const int ResY=800;
+const int ResX=1920;
+const int ResY=1080;
 bool fullscreen = true;
 bool vsync = true;
 
@@ -46,12 +63,13 @@ int main()
 {
 	// create device
     EventHandler receiver;
-
+	Init();
+	Output();
 	ISceneNode* objects [MAX_OBJECTS];
 
 
 
-	 IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(ResX, ResY), 16, fullscreen, false, vsync, &receiver); 
+	 IrrlichtDevice *device = createDevice(EDT_OPENGL, dimension2d<u32>(ResX, ResY), 32, fullscreen, false, vsync, &receiver); 
 	 
 	 receiver.device = device; 
 
@@ -141,6 +159,27 @@ int main()
 			objects[i]->setPosition( vector3df( (rand() % 30) - 15, (rand() % 30) - 15, rand() % 80 + pos.Z) );
 		}
 		
+		
+		if(pSensor){
+			Quatf quaternion = FusionResult.GetOrientation();
+			ICameraSceneNode* camera = smgr->getActiveCamera();
+			matrix4 matr;
+			matr(Matrix4f(quaternion));
+ 
+
+			 node->setPosition(  matr.getTranslation() );
+			 node->setRotation( matr.getRotationDegrees() );
+			float yaw, pitch, roll;
+			quaternion.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
+			//camera->setRotation( vector3df(RadToDegree(-pitch),RadToDegree(-yaw),RadToDegree(roll)));
+			//camera->setProjectionMatrix(ToMatrix(quaternion));
+			/*cout << " Yaw: " << RadToDegree(yaw) << 
+				", Pitch: " << RadToDegree(pitch) << 
+				", Roll: " << RadToDegree(roll) << endl;*/
+
+		
+			if (_kbhit()) exit(0);
+		}
 		renderer.drawAll(smgr); 
 		//smgr->drawAll();
         
@@ -151,6 +190,84 @@ int main()
 
 
     device->drop();
-
+	Clear();
     return 0;
+}
+
+/** Oculus init **/
+void Init()
+{
+	System::Init();
+
+	pManager = *DeviceManager::Create();
+
+	pHMD = *pManager->EnumerateDevices<HMDDevice>().CreateDevice();
+
+	if (pHMD)
+        {
+           InfoLoaded = pHMD->GetDeviceInfo(&Info);
+
+	   pSensor = *pHMD->GetSensor();
+	}
+	else
+	{
+	   pSensor = *pManager->EnumerateDevices<SensorDevice>().CreateDevice();
+	}
+
+	if (pSensor)
+	{
+	   FusionResult.AttachToSensor(pSensor);
+	}
+}
+void Clear()
+{
+	pSensor.Clear();
+        pHMD.Clear();
+	pManager.Clear();
+
+	System::Destroy();
+}
+void Output()
+{
+	cout << "----- Oculus Console -----" << endl;
+
+	if (pHMD)
+	{
+		cout << " [x] HMD Found" << endl;
+	}
+	else
+	{
+		cout << " [ ] HMD Not Found" << endl;
+	}
+
+	if (pSensor)
+	{
+		cout << " [x] Sensor Found" << endl;
+	}
+	else
+	{
+		cout << " [ ] Sensor Not Found" << endl;
+	}
+
+	cout << "--------------------------" << endl;
+
+	if (InfoLoaded)
+        {
+		cout << " DisplayDeviceName: " << Info.DisplayDeviceName << endl;
+		cout << " ProductName: " << Info.ProductName << endl;
+		cout << " Manufacturer: " << Info.Manufacturer << endl;
+		cout << " Version: " << Info.Version << endl;
+		cout << " HResolution: " << Info.HResolution<< endl;
+		cout << " VResolution: " << Info.VResolution<< endl;
+		cout << " HScreenSize: " << Info.HScreenSize<< endl;
+		cout << " VScreenSize: " << Info.VScreenSize<< endl;
+		cout << " VScreenCenter: " << Info.VScreenCenter<< endl;
+		cout << " EyeToScreenDistance: " << Info.EyeToScreenDistance << endl;
+		cout << " LensSeparationDistance: " << Info.LensSeparationDistance << endl;
+		cout << " InterpupillaryDistance: " << Info.InterpupillaryDistance << endl;
+		cout << " DistortionK[0]: " << Info.DistortionK[0] << endl;
+		cout << " DistortionK[1]: " << Info.DistortionK[1] << endl;
+		cout << " DistortionK[2]: " << Info.DistortionK[2] << endl;
+		cout << "--------------------------" << endl;
+        }
 }
