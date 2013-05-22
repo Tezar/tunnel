@@ -163,12 +163,14 @@ int main()
 		if(pSensor){
 			Quatf quaternion = FusionResult.GetOrientation();
 			ICameraSceneNode* camera = smgr->getActiveCamera();
-			matrix4 matr;
-			matr(Matrix4f(quaternion));
- 
+			Matrix4f dummy = Matrix4f(quaternion);
 
-			 node->setPosition(  matr.getTranslation() );
-			 node->setRotation( matr.getRotationDegrees() );
+			matrix4 matr;
+			
+			memcpy(matr.pointer(), dummy.M, 4*4* sizeof( float ) );
+			
+            camera->setRotation( matr.getRotationDegrees() );
+
 			float yaw, pitch, roll;
 			quaternion.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
 			//camera->setRotation( vector3df(RadToDegree(-pitch),RadToDegree(-yaw),RadToDegree(roll)));
