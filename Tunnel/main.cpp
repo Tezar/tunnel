@@ -6,6 +6,8 @@
 #include <iostream>
 #include <conio.h>
 
+#include "localSettings.h"
+
 using namespace irr;
 
 using namespace core;
@@ -24,10 +26,6 @@ HMDInfo			Info;
 bool			InfoLoaded;
 
 #define MAX_OBJECTS 50
-//#define EYES_OFFSET 5
-
-float EYES_OFFSET = 5.0;
-float VIEWPORT_OFFSET = 5.0;
 
 void Clear();
 void Init();
@@ -53,10 +51,16 @@ public:
 
 }; 
 
+#ifdef OCCULUS
+	const int ResX=1920;
+	const int ResY=1080;
+	bool fullscreen = true;
+#else
+	const int ResX=800;
+	const int ResY=600;
+	bool fullscreen = false;
+#endif	
 
-const int ResX=1920;
-const int ResY=1080;
-bool fullscreen = true;
 bool vsync = true;
 
 int main()
@@ -98,16 +102,8 @@ int main()
 
 	smgr->addCameraSceneNodeFPS();
 
-	 device->getCursorControl()->setVisible(false); 
+	device->getCursorControl()->setVisible(false); 
 
-
-	// load the quake map
-	/*
-	 device->getFileSystem()->addZipFileArchive("media/map-20kdm2.pk3");
-	IAnimatedMesh* mesh = smgr->getMesh("20kdm2.bsp");
-	ISceneNode* levelNode = smgr->addOctreeSceneNode(mesh->getMesh(0), 0, -1, 128);
-	levelNode->setPosition(core::vector3df(-1350,-90,-1400));
-	  */
 	// load a faerie 
 	IAnimatedMesh* faerie = smgr->getMesh("media/faerie.md2");
 	IAnimatedMeshSceneNode* faerieNode = smgr->addAnimatedMeshSceneNode(faerie);
@@ -122,15 +118,11 @@ int main()
 	IAnimatedMeshSceneNode* dwarfNode = smgr->addAnimatedMeshSceneNode(dwarf);
 	dwarfNode->setPosition(vector3df(40,-25,20));
 	  
-
-	/*  
-    if (node)
-    {
-        node->setMaterialFlag(EMF_LIGHTING, false);
-        node->setMD2Animation(scene::EMAT_STAND);
-        node->setMaterialTexture( 0, driver->getTexture("media/sydney.bmp") );
-    }
-	*/
+	const irr::scene::IGeometryCreator* creator = smgr->getGeometryCreator();
+	
+	IMesh* cylinder = creator->createCylinderMesh(10, 10, 30, video::SColor(0,255,200,100), false, 10);
+	IMeshSceneNode* cylinderNode = smgr->addMeshSceneNode(cylinder);
+	cylinderNode->setMaterialFlag(EMF_LIGHTING, false);
 
 
 	vector3df pos = vector3df(0,0,0);
@@ -163,13 +155,14 @@ int main()
 		if(pSensor){
 			Quatf quaternion = FusionResult.GetOrientation();
 			ICameraSceneNode* camera = smgr->getActiveCamera();
-			Matrix4f dummy = Matrix4f(quaternion);
+			
+			vector3df rot; 
 
-			matrix4 matr;
+			irr::core::quaternion q1(quaternion.x,quaternion.y, quaternion.z, quaternion.w);
+			q1.normalize();
+			q1.toEuler(rot);
 			
-			memcpy(matr.pointer(), dummy.M, 4*4* sizeof( float ) );
-			
-            camera->setRotation( matr.getRotationDegrees() );
+			camera->setRotation(rot);
 
 			float yaw, pitch, roll;
 			quaternion.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
@@ -182,8 +175,12 @@ int main()
 		
 			if (_kbhit()) exit(0);
 		}
-		renderer.drawAll(smgr); 
-		//smgr->drawAll();
+
+		#ifdef OCCULUS
+			renderer.drawAll(smgr); 
+		#else
+			smgr->drawAll();
+		#endif
         
         guienv->drawAll();
 
