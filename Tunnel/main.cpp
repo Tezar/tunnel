@@ -152,8 +152,16 @@ int main()
 
 	//device->setInputReceivingSceneManager(smgr);
 	
+	//použivane pro 
+	vector3df tempRot; 
+	irr::core::quaternion tempQ;
+	irr::core::matrix4 tempM;
+
+	float round = 0;
+
     while(device->run())
     {
+		round += 0.01;
         driver->beginScene(true, true, SColor(255,100,101,140));
 		
 		for(int i = 0; i < MAX_OBJECTS; i++){
@@ -163,22 +171,49 @@ int main()
 			objects[i]->setPosition( vector3df( (rand() % 30) - 15, (rand() % 30) - 15, rand() % 80 + pos.Z) );
 		}
 		
+	#ifndef OCCULUS
+			tempM.setRotationDegrees(vector3df(sin(round*0.5)*360-180, sin(round)*360-180, cos(round*0.8)*360-180));
+			
+			// transform forward vector of camera
+			irr::core::vector3df frv = irr::core::vector3df (0.0f, 0.0f, 1.0f);
+			tempM.transformVect(frv);
+    
+			// transform upvector of camera
+		    irr::core::vector3df upv = irr::core::vector3df (0.0f, 1.0f, 0.0f);
+			tempM.transformVect(upv);
+
+		    camera->setUpVector(upv); //set up vector of camera
+			camera->setTarget(frv); //set target of camera (look at point) (thx Zeuss for correcting it)
+
+	#endif
+
 		
 		if(pSensor){
 			Quatf quaternion = FusionResult.GetOrientation();
 
 		   ICameraSceneNode* camera = smgr->getActiveCamera();
    
-		   vector3df rot; 
+		   tempQ.set(-quaternion.z,quaternion.y,-quaternion.x, quaternion.w);
+		   tempQ.normalize();
+		   tempQ.toEuler(tempRot);
+    
 		   
+			tempM.setRotationDegrees(tempRot);
 
-		  // irr::core::quaternion q1(quaternion.x,quaternion.y, quaternion.z, quaternion.w);
-		   irr::core::quaternion q1(-quaternion.z,quaternion.y,-quaternion.x, quaternion.w);
-		   q1.normalize();
-		   q1.toEuler(rot);
-   
-		   
-		   //camera->getParent()->setRotation(rot*RADTODEG);
+			// transform forward vector of camera
+			irr::core::vector3df frv = irr::core::vector3df (0.0f, 0.0f, 1.0f);
+			tempM.transformVect(frv);
+    
+			// transform upvector of camera
+		    irr::core::vector3df upv = irr::core::vector3df (0.0f, 1.0f, 0.0f);
+			tempM.transformVect(upv);
+
+		    camera->setUpVector(upv); //set up vector of camera
+			camera->setTarget(frv); //set target of camera (look at point) (thx Zeuss for correcting it)
+
+			// update absolute position
+			camera->updateAbsolutePosition();
+
 
 
 			float yaw, pitch, roll;
