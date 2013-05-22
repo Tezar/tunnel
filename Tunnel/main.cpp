@@ -101,11 +101,16 @@ int main()
 	HMDStereoRender renderer(device, HMD, 10); 
 
 
-	smgr->addCameraSceneNode();
-	ICameraSceneNode* camera = smgr->getActiveCamera();
-	camera->bindTargetAndRotation(false);
-	camera->setTarget(vector3df(1,0,0));
-	 device->getCursorControl()->setVisible(false); 
+	#ifdef OCCULUS
+		ICameraSceneNode* camera = smgr->addCameraSceneNode();
+		camera->bindTargetAndRotation(false);
+		camera->setTarget(vector3df(1,0,0));
+	#else	
+		smgr->addCameraSceneNodeFPS();
+	#endif	
+
+	
+    device->getCursorControl()->setVisible(false); 
 
 
 	// load a faerie 
