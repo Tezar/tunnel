@@ -5,11 +5,11 @@ void Level::makeLevel(vector3df* pos){
     ISceneManager* smgr = device->getSceneManager();
 
 	
-	IMesh* cylinder = createMesh(50, 80, 30, video::SColor(0,255,200,100), false, 10);
+	IMesh* cylinder = createMesh(50, 80, 4, video::SColor(0,255,200,100), false, 10);
 
 	IMeshSceneNode* cylinderNode = smgr->addMeshSceneNode(cylinder);
 	
-	cylinderNode->setMaterialFlag(EMF_LIGHTING, false);
+	//cylinderNode->setMaterialFlag(EMF_LIGHTING, false);
 
 }; 
 

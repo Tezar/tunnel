@@ -108,7 +108,7 @@ int main()
 		camera->bindTargetAndRotation(false);
 		camera->setTarget(vector3df(1,0,0));
 	#else	
-		smgr->addCameraSceneNodeFPS();
+		ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
 	#endif	
 
 	
@@ -132,6 +132,9 @@ int main()
 	
 	Level currentLevel(device);
 	currentLevel.makeLevel(0);
+
+	smgr->setAmbientLight(video::SColorf(0.1,0.1,0.1,1));
+	ILightSceneNode* light1 = smgr->addLightSceneNode( camera , vector3df(0,0,0), video::SColorf(0.3f,0.4f,0.4f), 80.0f, 1 );
 
 
 	vector3df pos = vector3df(0,0,0);
