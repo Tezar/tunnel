@@ -162,21 +162,16 @@ void HMDStereoRender::drawAll(ISceneManager* smgr) {
   cout << " Yaw: " << (r.Y) << 
 				", Pitch: " << (r.X) << 
 				", Roll: " << (r.Z) << endl;
-  /*if(r.X>180){
-	r=last;
-  }else{
-	last=r;
-  }*/
+
   vector3df tx(-_eyeSeparation, 0.0,0.0);
   tx.rotateXZBy(-r.Y);
   tx.rotateYZBy(-r.X);
   tx.rotateXYBy(-r.Z);
-
+  
   _pCamera->setPosition(camera->getPosition() + tx);
-  //_pCamera->setTarget(camera->getTarget() + tx);  
- // _pCamera->bindTargetAndRotation(false);
-  _pCamera->setRotation(r);
-
+  _pCamera->setPosition(camera->getPosition() + tx);
+  _pCamera->setUpVector(camera->getUpVector() + tx);  
+ 
   smgr->setActiveCamera(_pCamera);
   smgr->drawAll();
 
@@ -200,6 +195,7 @@ void HMDStereoRender::drawAll(ISceneManager* smgr) {
 
   _pCamera->setPosition(camera->getPosition() + tx2);
   _pCamera->setTarget(camera->getTarget() + tx2);  
+  _pCamera->setUpVector(camera->getUpVector() + tx2);  
 
   smgr->drawAll();
 
